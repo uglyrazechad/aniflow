@@ -7,9 +7,12 @@ import { Toaster } from '@/components/toaster';
 
 import './globals.css';
 
+const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() || process.env.VERCEL_URL?.trim();
+
 const siteUrl =
   process.env.SITE_URL?.trim() ||
   process.env.RENDER_EXTERNAL_URL?.trim() ||
+  (vercelUrl ? `https://${vercelUrl}` : '') ||
   'http://localhost:3000';
 
 export const metadata: Metadata = {
