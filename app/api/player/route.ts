@@ -4,6 +4,7 @@ import { getPlayerPayload, AnimeGoError } from '@/lib/animego/api';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 function toPositiveInt(value: string | null, fallback: number): number {
   const parsed = Number(value);
