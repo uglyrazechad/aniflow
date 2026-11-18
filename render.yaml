@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: aniflow
+    name: aniflow-animego
     runtime: node
     plan: free
     region: frankfurt
