@@ -1,0 +1,183 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 6%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 6%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 6%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 6% 10%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 45%;
+    --accent: 240 5% 96%;
+    --accent-foreground: 240 6% 10%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 6% 90%;
+    --input: 240 6% 88%;
+    --ring: 262 83% 58%;
+    --radius: 0.9rem;
+  }
+
+  .dark {
+    --background: 240 14% 4%;
+    --foreground: 240 10% 96%;
+    --card: 240 12% 7%;
+    --card-foreground: 240 10% 96%;
+    --popover: 240 12% 7%;
+    --popover-foreground: 240 10% 96%;
+    --primary: 265 92% 71%;
+    --primary-foreground: 260 40% 8%;
+    --secondary: 240 8% 12%;
+    --secondary-foreground: 240 10% 96%;
+    --muted: 240 8% 12%;
+    --muted-foreground: 240 6% 64%;
+    --accent: 240 8% 14%;
+    --accent-foreground: 240 10% 96%;
+    --destructive: 0 72% 58%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 8% 16%;
+    --input: 240 8% 18%;
+    --ring: 265 92% 71%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', 'Segoe UI Variable Display', 'Segoe UI', system-ui, -apple-system,
+      'Helvetica Neue', Arial, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    min-height: 100vh;
+  }
+
+  /* Ambient glow behind the whole app — changes with theme. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(60rem 40rem at 15% -10%, hsl(var(--primary) / 0.12), transparent 60%),
+      radial-gradient(50rem 36rem at 100% 10%, hsl(172 66% 50% / 0.08), transparent 60%),
+      radial-gradient(40rem 30rem at 50% 110%, hsl(var(--primary) / 0.08), transparent 65%);
+  }
+
+  ::selection {
+    @apply bg-primary/30 text-foreground;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+    background-clip: content-box;
+  }
+
+  :focus-visible {
+    outline: none;
+  }
+}
+
+@layer components {
+  .surface {
+    @apply rounded-3xl border border-border/70 bg-card/70 backdrop-blur-xl;
+  }
+
+  .glass {
+    @apply border border-border/60 bg-background/70 backdrop-blur-xl;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-brand-400 via-primary to-teal-400 bg-clip-text text-transparent;
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden rounded-xl bg-muted/70;
+  }
+
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--foreground) / 0.07),
+      transparent
+    );
+    animation: shimmer 1.7s infinite;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .volume-range {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .volume-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 11px;
+    height: 11px;
+    border-radius: 999px;
+    background: hsl(var(--foreground));
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.25);
+  }
+  .volume-range::-moz-range-thumb {
+    width: 11px;
+    height: 11px;
+    border: none;
+    border-radius: 999px;
+    background: hsl(var(--foreground));
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.25);
+  }
+}
+
+@layer utilities {
+  .mask-fade-b {
+    mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+  }
+  .mask-fade-x {
+    mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+}
