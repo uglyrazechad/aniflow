@@ -24,6 +24,7 @@ export const dynamic = 'force-dynamic';
 
 interface AnimePageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ season?: string; episode?: string }>;
 }
 
 export async function generateMetadata({ params }: AnimePageProps): Promise<Metadata> {
@@ -51,8 +52,14 @@ export async function generateMetadata({ params }: AnimePageProps): Promise<Meta
   }
 }
 
-export default async function AnimePage({ params }: AnimePageProps) {
+export default async function AnimePage({ params, searchParams }: AnimePageProps) {
   const { id } = await params;
+  const { season: seasonParam, episode: episodeParam } = await searchParams;
+
+  const toInt = (value?: string) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? Math.trunc(parsed) : undefined;
+  };
 
   let anime: Awaited<ReturnType<typeof getAnimeDetails>> = null;
   let error: string | null = null;
@@ -197,7 +204,13 @@ export default async function AnimePage({ params }: AnimePageProps) {
         </div>
       </div>
 
-      <PlayerSection anime={anime} translations={translations} isDemo={demo} />
+      <PlayerSection
+        anime={anime}
+        translations={translations}
+        isDemo={demo}
+        initialSeason={toInt(seasonParam)}
+        initialEpisode={toInt(episodeParam)}
+      />
 
       {/* Факты */}
       {facts.length ? (

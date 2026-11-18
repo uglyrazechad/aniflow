@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
   ChevronDown,
@@ -26,18 +26,28 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { AnimeDetails, PlayerPayload, TranslationOption } from '@/types/anime';
+import { getProgress, saveProgress } from '@/lib/watch-progress';
 import { cn } from '@/lib/utils';
 
 interface PlayerSectionProps {
   anime: AnimeDetails;
   translations: TranslationOption[];
   isDemo: boolean;
+  /** Серия/сезон из ссылки «Продолжить просмотр». */
+  initialSeason?: number;
+  initialEpisode?: number;
 }
 
-export function PlayerSection({ anime, translations, isDemo }: PlayerSectionProps) {
+export function PlayerSection({
+  anime,
+  translations,
+  isDemo,
+  initialSeason: initialSeasonProp,
+  initialEpisode: initialEpisodeProp,
+}: PlayerSectionProps) {
   const seasons = anime.seasons ?? [];
-  const initialSeason = seasons[0]?.season ?? 1;
-  const initialEpisode = seasons[0]?.episodes?.[0]?.episode ?? 1;
+  const initialSeason = initialSeasonProp ?? seasons[0]?.season ?? 1;
+  const initialEpisode = initialEpisodeProp ?? seasons[0]?.episodes?.[0]?.episode ?? 1;
 
   const [season, setSeason] = useState(initialSeason);
   const [episode, setEpisode] = useState(initialEpisode);
@@ -47,6 +57,51 @@ export function PlayerSection({ anime, translations, isDemo }: PlayerSectionProp
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [autoNext, setAutoNext] = useState(false);
+  const [restored, setRestored] = useState(false);
+
+  // Точка возобновления: читается плеером один раз при монтировании.
+  const resumeRef = useRef<{ season: number; episode: number; time: number } | null>(null);
+
+  // Восстанавливаем последнюю серию и минуту из localStorage (только в браузере).
+  useEffect(() => {
+    const saved = getProgress(anime.id);
+    const hasLink = initialSeasonProp != null || initialEpisodeProp != null;
+
+    let nextSeason = initialSeasonProp ?? seasons[0]?.season ?? 1;
+    let nextEpisode = initialEpisodeProp ?? seasons[0]?.episodes?.[0]?.episode ?? 1;
+
+    if (!hasLink && saved) {
+      const target =
+        seasons.find(
+          (item) =>
+            item.season === saved.season &&
+            item.episodes.some((entry) => entry.episode === saved.episode),
+        ) ?? seasons.find((item) => item.episodes.some((entry) => entry.episode === saved.episode));
+
+      if (target) {
+        nextSeason = target.season;
+        nextEpisode = saved.episode;
+      } else {
+        nextSeason = saved.season;
+        nextEpisode = saved.episode;
+      }
+
+      if (translations.some((item) => item.id === saved.translationId)) {
+        setTranslationId(saved.translationId);
+      }
+    }
+
+    setSeason(nextSeason);
+    setEpisode(nextEpisode);
+
+    if (saved && saved.season === nextSeason && saved.episode === nextEpisode && saved.position > 5) {
+      resumeRef.current = { season: nextSeason, episode: nextEpisode, time: saved.position };
+    }
+
+    setRestored(true);
+    // Восстановление выполняется один раз для конкретного тайтла.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [anime.id]);
 
   const translation = translations.find((item) => item.id === translationId) ?? translations[0];
   const totalEpisodes = seasons.reduce((sum, item) => sum + item.episodes.length, 0);
@@ -54,7 +109,7 @@ export function PlayerSection({ anime, translations, isDemo }: PlayerSectionProp
 
   // Загрузка потока для выбранной озвучки / серии.
   useEffect(() => {
-    if (isDemo) return;
+    if (isDemo || !restored) return;
 
     const controller = new AbortController();
     let cancelled = false;
@@ -103,7 +158,39 @@ export function PlayerSection({ anime, translations, isDemo }: PlayerSectionProp
       cancelled = true;
       controller.abort();
     };
-  }, [anime.id, episode, translationId, isDemo, reloadKey]);
+  }, [anime.id, episode, translationId, isDemo, reloadKey, restored]);
+
+  // Сохраняем, где остановились: серия, сезон, озвучка и минута.
+  const handleProgress = useCallback(
+    (position: number, duration: number) => {
+      if (isDemo) return;
+
+      resumeRef.current = null;
+
+      saveProgress({
+        id: anime.id,
+        title: anime.title,
+        posterUrl: anime.posterUrl,
+        season,
+        episode,
+        translationId,
+        translationTitle: translation?.title,
+        position,
+        duration,
+        updatedAt: Date.now(),
+      });
+    },
+    [
+      anime.id,
+      anime.title,
+      anime.posterUrl,
+      isDemo,
+      season,
+      episode,
+      translationId,
+      translation?.title,
+    ],
+  );
 
   const nextEpisode = useMemo(() => {
     const seasonIndex = seasons.findIndex((item) => item.season === season);
@@ -184,6 +271,14 @@ export function PlayerSection({ anime, translations, isDemo }: PlayerSectionProp
           src={payload.stream.src}
           type={payload.stream.type}
           autoPlay={autoNext}
+          initialTime={
+            resumeRef.current &&
+            resumeRef.current.season === season &&
+            resumeRef.current.episode === episode
+              ? resumeRef.current.time
+              : 0
+          }
+          onProgress={handleProgress}
           onEnded={handleEnded}
         />
       )}

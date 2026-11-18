@@ -36,6 +36,9 @@ interface VideoPlayerProps {
   src: string;
   type?: 'hls' | 'mp4';
   autoPlay?: boolean;
+  /** Секунда, с которой нужно начать воспроизведение при монтировании. */
+  initialTime?: number;
+  onProgress?: (time: number, duration: number) => void;
   onEnded?: () => void;
   className?: string;
 }
@@ -52,6 +55,8 @@ export function VideoPlayer({
   src,
   type = 'hls',
   autoPlay = false,
+  initialTime = 0,
+  onProgress,
   onEnded,
   className,
 }: VideoPlayerProps) {
@@ -78,6 +83,19 @@ export function VideoPlayer({
   const [currentHeight, setCurrentHeight] = useState(0);
   const playbackRef = useRef({ time: 0, playing: false });
 
+  // Последняя известная позиция — для сохранения прогресса.
+  const latestRef = useRef({ time: 0, duration: 0 });
+  const savedAtRef = useRef(0);
+  const initialTimeRef = useRef(initialTime);
+
+  const reportProgress = useCallback(
+    (time: number, duration: number) => {
+      latestRef.current = { time, duration };
+      onProgress?.(time, duration);
+    },
+    [onProgress],
+  );
+
   // --- Загрузка потока: HLS через hls.js с адаптивным качеством или прямой MP4 ---
   useEffect(() => {
     const video = videoRef.current;
@@ -98,9 +116,10 @@ export function VideoPlayer({
     setCurrentHeight(0);
 
     const restorePosition = () => {
-      if (resumeAt > 0.5) {
+      const startAt = resumeAt > 0.5 ? resumeAt : initialTimeRef.current;
+      if (startAt > 0.5) {
         try {
-          video.currentTime = resumeAt;
+          video.currentTime = startAt;
         } catch {
           /* некоторые браузеры не дают выставить время до загрузки */
         }
@@ -210,6 +229,17 @@ export function VideoPlayer({
     document.addEventListener('fullscreenchange', onChange);
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
+
+  // Досохраняем позицию, когда страница уходит в фон (закрытие вкладки, переключение приложения).
+  useEffect(() => {
+    const flush = () => {
+      if (document.visibilityState === 'hidden') {
+        reportProgress(latestRef.current.time, latestRef.current.duration);
+      }
+    };
+    document.addEventListener('visibilitychange', flush);
+    return () => document.removeEventListener('visibilitychange', flush);
+  }, [reportProgress]);
 
   const applyLevel = useCallback((index: number) => {
     setSelectedLevel(index);
@@ -371,12 +401,26 @@ export function VideoPlayer({
         onPause={() => {
           setPlaying(false);
           playbackRef.current.playing = false;
+          const video = videoRef.current;
+          if (video) reportProgress(video.currentTime, video.duration || latestRef.current.duration);
         }}
         onTimeUpdate={(event) => {
-          setCurrentTime(event.currentTarget.currentTime);
-          playbackRef.current.time = event.currentTarget.currentTime;
+          const video = event.currentTarget;
+          setCurrentTime(video.currentTime);
+          playbackRef.current.time = video.currentTime;
+          latestRef.current.time = video.currentTime;
+
+          // Пишем прогресс не чаще раза в 5 секунд, чтобы не дёргать хранилище.
+          if (video.currentTime - savedAtRef.current >= 5) {
+            savedAtRef.current = video.currentTime;
+            reportProgress(video.currentTime, video.duration || latestRef.current.duration);
+          }
         }}
-        onDurationChange={(event) => setDuration(event.currentTarget.duration || 0)}
+        onDurationChange={(event) => {
+          const value = event.currentTarget.duration || 0;
+          latestRef.current.duration = value;
+          setDuration(value);
+        }}
         onProgress={(event) => {
           const video = event.currentTarget;
           setBuffered(video.buffered.length ? video.buffered.end(video.buffered.length - 1) : 0);
@@ -386,6 +430,8 @@ export function VideoPlayer({
         onCanPlay={() => setLoading(false)}
         onEnded={() => {
           setPlaying(false);
+          latestRef.current.time = 0;
+          onProgress?.(0, latestRef.current.duration);
           onEnded?.();
         }}
         onError={() => {
@@ -393,7 +439,11 @@ export function VideoPlayer({
           setError('Не удалось загрузить видео. Проверьте соединение и попробуйте снова.');
           setLoading(false);
         }}
-        onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)}
+        onLoadedMetadata={(event) => {
+          const value = event.currentTarget.duration || 0;
+          latestRef.current.duration = value;
+          setDuration(value);
+        }}
       />
 
       {/* Верхняя панель */}

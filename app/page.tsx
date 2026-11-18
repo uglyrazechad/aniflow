@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowRight, Compass, Search } from 'lucide-react';
 
 import { AnimeSection } from '@/components/anime-section';
+import { ContinueWatching } from '@/components/continue-watching';
 import { DemoBanner } from '@/components/demo-banner';
 import { EmptyState } from '@/components/empty-state';
 import { Hero } from '@/components/hero';
@@ -18,6 +19,8 @@ export default async function HomePage() {
       {home.source === 'demo' ? <DemoBanner className="animate-fade-in" /> : null}
 
       <Hero anime={home.featured} />
+
+      <ContinueWatching />
 
       {home.sections.length ? (
         <div className="space-y-12 lg:space-y-16">
