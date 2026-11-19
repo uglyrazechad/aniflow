@@ -9,16 +9,27 @@ import {
   listProgress,
   progressPercent,
   removeProgress,
+  syncAccountProgress,
   type WatchProgress,
 } from '@/lib/watch-progress';
 import { formatTime } from '@/lib/utils';
 
-/** «Продолжить просмотр» — последние серии и минуты из localStorage. */
-export function ContinueWatching() {
+interface ContinueWatchingProps {
+  title?: string;
+  subtitle?: string;
+  /** Если задан — при пустой истории показываем текст вместо пустого места. */
+  emptyText?: string;
+}
+
+/** «Продолжить просмотр» — последние серии и минуты из localStorage и аккаунта. */
+export function ContinueWatching({ title = 'Продолжить просмотр', subtitle = 'С того места, где вы остановились', emptyText }: ContinueWatchingProps) {
   const [items, setItems] = useState<WatchProgress[]>([]);
 
   useEffect(() => {
     setItems(listProgress());
+
+    // Подтягиваем прогресс из аккаунта, затем слушаем изменения хранилища.
+    void syncAccountProgress().then(() => setItems(listProgress()));
 
     const sync = () => setItems(listProgress());
     window.addEventListener('storage', sync);
@@ -30,7 +41,15 @@ export function ContinueWatching() {
     };
   }, []);
 
-  if (!items.length) return null;
+  if (!items.length) {
+    if (!emptyText) return null;
+
+    return (
+      <p className="rounded-2xl border border-border/60 bg-card/40 px-6 py-12 text-center text-sm text-muted-foreground">
+        {emptyText}
+      </p>
+    );
+  }
 
   return (
     <section className="space-y-5">
@@ -38,11 +57,9 @@ export function ContinueWatching() {
         <div className="space-y-1">
           <h2 className="flex items-center gap-2 text-xl font-semibold tracking-tight sm:text-2xl">
             <History className="h-5 w-5 text-primary" />
-            Продолжить просмотр
+            {title}
           </h2>
-          <p className="text-sm text-muted-foreground">
-            С того места, где вы остановились
-          </p>
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
         </div>
       </div>
 

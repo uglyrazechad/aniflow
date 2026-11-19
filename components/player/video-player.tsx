@@ -13,6 +13,7 @@ import {
   RotateCcw,
   RotateCw,
   Settings2,
+  SkipForward,
   Volume2,
   VolumeX,
 } from 'lucide-react';
@@ -38,6 +39,8 @@ interface VideoPlayerProps {
   autoPlay?: boolean;
   /** Секунда, с которой нужно начать воспроизведение при монтировании. */
   initialTime?: number;
+  /** Окно заставки: пока текущая секунда внутри, показываем «Пропустить заставку». */
+  intro?: { start: number; end: number };
   onProgress?: (time: number, duration: number) => void;
   onEnded?: () => void;
   className?: string;
@@ -56,6 +59,7 @@ export function VideoPlayer({
   type = 'hls',
   autoPlay = false,
   initialTime = 0,
+  intro,
   onProgress,
   onEnded,
   className,
@@ -359,6 +363,12 @@ export function VideoPlayer({
   const bufferedPercent = duration > 0 ? (buffered / duration) * 100 : 0;
   const showControls = controlsVisible || !playing || menuOpen;
 
+  const showSkipIntro =
+    intro != null &&
+    currentTime >= intro.start &&
+    currentTime < intro.end - 1 &&
+    (duration === 0 || intro.end < duration * 0.5);
+
   const selectedQuality =
     selectedLevel >= 0
       ? levels.find((level) => level.index === selectedLevel)?.height
@@ -520,6 +530,21 @@ export function VideoPlayer({
             Повторить
           </Button>
         </div>
+      ) : null}
+
+      {/* Пропуск заставки */}
+      {showSkipIntro && intro ? (
+        <button
+          type="button"
+          onClick={() => {
+            seekTo(intro.end);
+            revealControls();
+          }}
+          className="absolute bottom-24 right-3 z-30 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-black/65 px-3.5 py-2.5 text-xs font-medium text-white shadow-lg backdrop-blur-md transition-colors hover:border-white/30 hover:bg-black/80 sm:bottom-28 sm:text-sm"
+        >
+          <SkipForward className="h-4 w-4" />
+          Пропустить заставку
+        </button>
       ) : null}
 
       {/* Нижние органы управления */}

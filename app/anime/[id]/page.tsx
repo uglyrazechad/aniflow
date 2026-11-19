@@ -5,6 +5,7 @@ import { Calendar, Clock, Film, Layers, Play, Star, Tv } from 'lucide-react';
 
 import { DemoBanner } from '@/components/demo-banner';
 import { ErrorState, RetryLink } from '@/components/error-state';
+import { FavoriteButton } from '@/components/favorite-button';
 import { PlayerSection } from '@/components/player/player-section';
 import { Poster } from '@/components/poster';
 import { Badge } from '@/components/ui/badge';
@@ -197,6 +198,15 @@ export default async function AnimePage({ params, searchParams }: AnimePageProps
                 Похожие тайтлы
               </Link>
             </Button>
+            <FavoriteButton
+              anime={{
+                id: anime.id,
+                title: anime.title,
+                posterUrl: anime.posterUrl,
+                year: anime.year,
+                rating: anime.rating,
+              }}
+            />
             <span className="text-xs text-muted-foreground">
               {translations.length > 1 ? `${translations.length} озвучки` : 'Озвучка AnimeGO'}
             </span>

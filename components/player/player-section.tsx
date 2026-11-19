@@ -26,7 +26,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { AnimeDetails, PlayerPayload, TranslationOption } from '@/types/anime';
-import { getProgress, saveProgress } from '@/lib/watch-progress';
+import { getProgress, saveProgress, syncAccountProgress } from '@/lib/watch-progress';
 import { cn } from '@/lib/utils';
 
 interface PlayerSectionProps {
@@ -62,43 +62,58 @@ export function PlayerSection({
   // Точка возобновления: читается плеером один раз при монтировании.
   const resumeRef = useRef<{ season: number; episode: number; time: number } | null>(null);
 
-  // Восстанавливаем последнюю серию и минуту из localStorage (только в браузере).
+  // Восстанавливаем последнюю серию и минуту: сначала подтягиваем прогресс из аккаунта.
   useEffect(() => {
-    const saved = getProgress(anime.id);
-    const hasLink = initialSeasonProp != null || initialEpisodeProp != null;
+    let cancelled = false;
 
-    let nextSeason = initialSeasonProp ?? seasons[0]?.season ?? 1;
-    let nextEpisode = initialEpisodeProp ?? seasons[0]?.episodes?.[0]?.episode ?? 1;
+    const restore = async () => {
+      await syncAccountProgress();
+      if (cancelled) return;
 
-    if (!hasLink && saved) {
-      const target =
-        seasons.find(
-          (item) =>
-            item.season === saved.season &&
-            item.episodes.some((entry) => entry.episode === saved.episode),
-        ) ?? seasons.find((item) => item.episodes.some((entry) => entry.episode === saved.episode));
+      const saved = getProgress(anime.id);
+      const hasLink = initialSeasonProp != null || initialEpisodeProp != null;
 
-      if (target) {
-        nextSeason = target.season;
-        nextEpisode = saved.episode;
-      } else {
-        nextSeason = saved.season;
-        nextEpisode = saved.episode;
+      let nextSeason = initialSeasonProp ?? seasons[0]?.season ?? 1;
+      let nextEpisode = initialEpisodeProp ?? seasons[0]?.episodes?.[0]?.episode ?? 1;
+
+      if (!hasLink && saved) {
+        const target =
+          seasons.find(
+            (item) =>
+              item.season === saved.season &&
+              item.episodes.some((entry) => entry.episode === saved.episode),
+          ) ?? seasons.find((item) => item.episodes.some((entry) => entry.episode === saved.episode));
+
+        if (target) {
+          nextSeason = target.season;
+          nextEpisode = saved.episode;
+        } else {
+          nextSeason = saved.season;
+          nextEpisode = saved.episode;
+        }
+
+        if (translations.some((item) => item.id === saved.translationId)) {
+          setTranslationId(saved.translationId);
+        }
       }
 
-      if (translations.some((item) => item.id === saved.translationId)) {
-        setTranslationId(saved.translationId);
+      setSeason(nextSeason);
+      setEpisode(nextEpisode);
+
+      if (
+        saved &&
+        saved.season === nextSeason &&
+        saved.episode === nextEpisode &&
+        saved.position > 5
+      ) {
+        resumeRef.current = { season: nextSeason, episode: nextEpisode, time: saved.position };
       }
-    }
 
-    setSeason(nextSeason);
-    setEpisode(nextEpisode);
+      setRestored(true);
+    };
 
-    if (saved && saved.season === nextSeason && saved.episode === nextEpisode && saved.position > 5) {
-      resumeRef.current = { season: nextSeason, episode: nextEpisode, time: saved.position };
-    }
+    void restore();
 
-    setRestored(true);
     // Восстановление выполняется один раз для конкретного тайтла.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anime.id]);
@@ -271,6 +286,7 @@ export function PlayerSection({
           src={payload.stream.src}
           type={payload.stream.type}
           autoPlay={autoNext}
+          intro={totalEpisodes > 1 ? { start: 3, end: 92 } : undefined}
           initialTime={
             resumeRef.current &&
             resumeRef.current.season === season &&

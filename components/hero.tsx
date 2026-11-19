@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Calendar, Info, Play, Star, Tv } from 'lucide-react';
+import { Calendar, Dices, Info, Play, Star, Tv } from 'lucide-react';
 
 import { Poster } from '@/components/poster';
 import { Badge } from '@/components/ui/badge';
@@ -135,6 +135,12 @@ export function Hero({ anime }: HeroProps) {
               <Link href={`/anime/${anime.id}`}>
                 <Info className="h-4 w-4" />
                 Подробнее
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="ghost" className="backdrop-blur-sm">
+              <Link href="/random" prefetch={false}>
+                <Dices className="h-4 w-4" />
+                Случайное
               </Link>
             </Button>
           </motion.div>

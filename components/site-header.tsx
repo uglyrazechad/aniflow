@@ -8,6 +8,7 @@ import { Menu, Search } from 'lucide-react';
 import { Logo } from '@/components/logo';
 import { SearchBox } from '@/components/search-box';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { UserMenu } from '@/components/user-menu';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -72,6 +73,7 @@ export function SiteHeader() {
 
         <div className="ml-auto flex items-center gap-2">
           <SearchBox className="hidden w-64 lg:block xl:w-80" />
+          <UserMenu />
           <ThemeToggle />
 
           <Button
