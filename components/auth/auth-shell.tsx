@@ -30,21 +30,21 @@ export function AuthShell({ title, subtitle, children }: AuthShellProps) {
             </h2>
             <ul className="space-y-3 text-sm text-white/75">
               <li className="flex items-start gap-2">
-                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-teal-300" />
+                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />
                 Аватар, баннер и фон профиля — на свой вкус
               </li>
               <li className="flex items-start gap-2">
-                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-teal-300" />
+                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />
                 Продолжайте с той же минуты на любом устройстве
               </li>
               <li className="flex items-start gap-2">
-                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-teal-300" />
+                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />
                 Список избранного всегда под рукой
               </li>
             </ul>
           </div>
           <p className="relative text-xs text-white/45">
-            Видео предоставляется AnimeGO. AniFlow не хранит видеоматериалы.
+            Видео предоставляется AnimeGO. AniHub не хранит видеоматериалы.
           </p>
         </div>
 

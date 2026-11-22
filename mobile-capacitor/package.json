@@ -1,0 +1,10 @@
+{
+  "name": "anihub-mobile",
+  "private": true,
+  "version": "1.0.0",
+  "description": "AniHub — смотрим вместе (PWA → нативный подход). Пока демо: веб-сайт; дальше — Capacitor APK.",
+  "dependencies": {
+    "@capacitor/cli": "^8.6.2",
+    "@capacitor/core": "^8.6.2"
+  }
+}

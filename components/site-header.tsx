@@ -22,7 +22,6 @@ import { cn } from '@/lib/utils';
 
 const navLinks = [
   { href: '/', label: 'Главная' },
-  { href: '/#popular', label: 'Популярное' },
   { href: '/#new', label: 'Новинки' },
   { href: '/#ongoing', label: 'Онгоинги' },
 ];
@@ -48,7 +47,7 @@ export function SiteHeader() {
           : 'border-b border-transparent bg-transparent',
       )}
     >
-      <div className="container flex h-16 items-center gap-3 md:gap-6">
+      <div className="container flex h-16 items-center gap-2 md:gap-6">
         <Logo />
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -124,7 +123,7 @@ export function SiteHeader() {
               </nav>
 
               <p className="mt-auto rounded-xl border border-border/60 bg-card/40 p-3 text-xs leading-relaxed text-muted-foreground">
-                AniFlow — красивый интерфейс к каталогу AnimeGO. Видео предоставляется сервисом
+                AniHub — красивый интерфейс к каталогу AnimeGO. Видео предоставляется сервисом
                 AnimeGO, сайт его не хранит.
               </p>
             </SheetContent>

@@ -31,12 +31,12 @@ export function Hero({ anime }: HeroProps) {
             className="h-full w-full scale-110 object-cover opacity-25 blur-2xl"
           />
         ) : (
-          <div className="h-full w-full bg-gradient-to-br from-brand-900/60 via-background to-teal-900/40" />
+          <div className="h-full w-full bg-gradient-to-br from-brand-900/60 via-background to-brand-600/40" />
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         <div className="absolute -left-24 top-1/3 h-64 w-64 rounded-full bg-primary/20 blur-[90px] animate-pulse-soft" />
-        <div className="absolute -right-10 bottom-0 h-56 w-56 rounded-full bg-teal-500/15 blur-[80px] animate-pulse-soft" />
+        <div className="absolute -right-10 bottom-0 h-56 w-56 rounded-full bg-brand-500/15 blur-[80px] animate-pulse-soft" />
       </div>
 
       <div className="relative grid gap-8 p-6 sm:p-10 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-center lg:p-12">
@@ -153,7 +153,7 @@ export function Hero({ anime }: HeroProps) {
           transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className="relative mx-auto hidden w-full max-w-[240px] lg:block"
         >
-          <div className="absolute -inset-3 rounded-[1.6rem] bg-gradient-to-br from-brand-500/40 to-teal-400/30 blur-2xl" />
+          <div className="absolute -inset-3 rounded-[1.6rem] bg-gradient-to-br from-brand-500/40 to-brand-300/30 blur-2xl" />
           <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
             <Poster
               src={anime.posterUrl}

@@ -6,6 +6,7 @@ import { Calendar, Clock, Film, Layers, Play, Star, Tv } from 'lucide-react';
 import { DemoBanner } from '@/components/demo-banner';
 import { ErrorState, RetryLink } from '@/components/error-state';
 import { FavoriteButton } from '@/components/favorite-button';
+import { WatchTogetherButton } from '@/components/watch-together-button';
 import { PlayerSection } from '@/components/player/player-section';
 import { Poster } from '@/components/poster';
 import { Badge } from '@/components/ui/badge';
@@ -41,7 +42,7 @@ export async function generateMetadata({ params }: AnimePageProps): Promise<Meta
       title: anime.title,
       description:
         description ||
-        `${anime.title}${anime.year ? ` (${anime.year})` : ''} — смотреть онлайн в AniFlow.`,
+        `${anime.title}${anime.year ? ` (${anime.year})` : ''} — смотреть онлайн в AniHub.`,
       openGraph: {
         title: anime.title,
         description,
@@ -125,7 +126,7 @@ export default async function AnimePage({ params, searchParams }: AnimePageProps
       {/* Шапка тайтла */}
       <div className="grid grid-cols-[110px_minmax(0,1fr)] items-start gap-5 sm:grid-cols-[160px_minmax(0,1fr)] sm:gap-7 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
         <div className="relative">
-          <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-brand-500/30 to-teal-400/20 blur-xl" />
+          <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-brand-500/30 to-brand-300/20 blur-xl" />
           <Poster
             src={anime.posterUrl}
             alt={`Постер «${anime.title}»`}
@@ -193,6 +194,7 @@ export default async function AnimePage({ params, searchParams }: AnimePageProps
                 Смотреть
               </a>
             </Button>
+            <WatchTogetherButton animeId={anime.id} />
             <Button asChild variant="outline">
               <Link href={`/search?q=${encodeURIComponent(anime.titleOrig || anime.title)}`}>
                 Похожие тайтлы
@@ -243,7 +245,7 @@ export default async function AnimePage({ params, searchParams }: AnimePageProps
       ) : null}
 
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Данные и видео предоставляются сервисом AnimeGO. AniFlow не хранит видеоматериалы и не
+        Данные и видео предоставляются сервисом AnimeGO. AniHub не хранит видеоматериалы и не
         размещает собственный контент. Если плеер не запускается, попробуйте сменить озвучку или
         серию.
       </p>

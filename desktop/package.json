@@ -1,0 +1,13 @@
+{
+  "name": "ani-hub-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Desktop-версия AniHub — открывает сайт как отдельное приложение.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^35"
+  }
+}

@@ -1,0 +1,22 @@
+[package]
+name = "anihub-app"
+version = "1.0.0"
+edition = "2021"
+description = "AniHub — смотрим вместе. Нативное приложение (Tauri) — окно поверх фронт-сервера localhost:3000."
+
+[lib]
+name = "app_lib"
+path = "src-tauri/src/lib.rs"
+
+[[bin]]
+name = "anihub-app"
+path = "src-tauri/src/main.rs"
+
+[dependencies]
+tauri = { version = "2", features = [] }
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dev-dependencies]
+tauri = { version = "2", features = [] }

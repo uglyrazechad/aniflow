@@ -1,6 +1,6 @@
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 
 import {
   db,
@@ -9,6 +9,7 @@ import {
   flush,
   type Profile,
   type SessionRecord,
+  type SocialProvider,
   type UserRecord,
 } from './db';
 
@@ -20,6 +21,7 @@ export interface SafeUser {
   email: string;
   username: string;
   createdAt: number;
+  emailVerified: boolean;
   profile: Profile;
 }
 
@@ -29,8 +31,49 @@ export function toSafeUser(user: UserRecord): SafeUser {
     email: user.email,
     username: user.username,
     createdAt: user.createdAt,
+    emailVerified: user.emailVerified,
     profile: user.profile,
   };
+}
+
+/** Случайный пароль для социальных аккаунтов (вход через VK/Яндекс). */
+export function randomPassword(length = 14): string {
+  return randomBytes(Math.ceil((length * 3) / 4))
+    .toString('base64url')
+    .slice(0, length);
+}
+
+/** Создать пользователя через социальную сеть (Яндекс/VK). Почта считается подтверждённой. */
+export function createSocialUser(
+  provider: SocialProvider,
+  providerId: string,
+  email: string,
+  displayName: string,
+): UserRecord {
+  const taken = (value: string) =>
+    db().users.some((user) => user.username.toLowerCase() === value.toLowerCase());
+
+  const user: UserRecord = {
+    id: newUserId(),
+    email,
+    username: makeUsername(email, taken),
+    passwordHash: randomPassword(14),
+    createdAt: Date.now(),
+    profile: defaultProfile(displayName),
+    progress: {},
+    favorites: [],
+    emailVerified: true,
+    emailCode: null,
+    emailCodeExpiresAt: null,
+    resetCode: null,
+    resetExpiresAt: 0,
+    provider,
+    providerId,
+  };
+
+  db().users.push(user);
+  flush();
+  return user;
 }
 
 export function defaultProfile(displayName: string): Profile {
@@ -115,10 +158,15 @@ function userByToken(token?: string): UserRecord | null {
   return findUserById(session.userId) ?? null;
 }
 
-/** Текущий пользователь из cookie (для серверных компонентов и route-хендлеров). */
+/** Текущий пользователь из cookie или Bearer-токена (мобильное приложение). */
 export async function currentUser(): Promise<UserRecord | null> {
   const store = await cookies();
-  return userByToken(store.get(SESSION_COOKIE)?.value);
+  const cookieToken = store.get(SESSION_COOKIE)?.value;
+  if (cookieToken) return userByToken(cookieToken);
+
+  const header = (await headers()).get('authorization');
+  const bearer = header?.startsWith('Bearer ') ? header.slice(7).trim() : '';
+  return userByToken(bearer);
 }
 
 export async function setSessionCookie(token: string, expiresAt: number): Promise<void> {

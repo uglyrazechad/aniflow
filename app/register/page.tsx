@@ -20,7 +20,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
   return (
     <AuthShell
       title="Создать аккаунт"
-      subtitle="Почта и пароль — всё, что нужно. Подтверждение почты не требуется"
+      subtitle="Почта и пароль — код подтверждения придёт на почту"
     >
       <AuthForm mode="register" next={next} />
     </AuthShell>

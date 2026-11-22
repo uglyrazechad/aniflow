@@ -34,6 +34,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Неверная почта или пароль' }, { status: 401 });
   }
 
+  if (!user.emailVerified) {
+    return NextResponse.json(
+      { error: 'Аккаунт не подтверждён — проверьте код в письме на почту', needsVerification: true },
+      { status: 403 },
+    );
+  }
+
   const session = createSession(user.id);
   await setSessionCookie(session.token, session.expiresAt);
 

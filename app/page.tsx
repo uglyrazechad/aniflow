@@ -49,7 +49,7 @@ export default async function HomePage() {
       )}
 
       {/* Поисковая подсказка */}
-      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-brand-500/10 via-card/40 to-teal-500/10 p-6 sm:p-10">
+      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-brand-500/10 via-card/40 to-brand-300/10 p-6 sm:p-10">
         <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
         <div className="relative flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-center">
           <div className="space-y-2">

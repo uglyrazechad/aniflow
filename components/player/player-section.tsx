@@ -286,7 +286,14 @@ export function PlayerSection({
           src={payload.stream.src}
           type={payload.stream.type}
           autoPlay={autoNext}
-          intro={totalEpisodes > 1 ? { start: 3, end: 92 } : undefined}
+          intro={
+            totalEpisodes > 1
+              ? {
+                  start: 2,
+                  end: anime.duration ? Math.min(92, Math.max(30, anime.duration * 60 * 0.06)) : 92,
+                }
+              : undefined
+          }
           initialTime={
             resumeRef.current &&
             resumeRef.current.season === season &&
@@ -345,7 +352,7 @@ export function PlayerSection({
             <span
               className={cn(
                 'h-1.5 w-1.5 rounded-full',
-                isDemo ? 'bg-amber-400' : 'bg-teal-400',
+                isDemo ? 'bg-amber-400' : 'bg-brand-400',
               )}
             />
             {isDemo ? 'Демо' : 'AnimeGO'}

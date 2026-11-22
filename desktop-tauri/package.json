@@ -1,0 +1,9 @@
+{
+  "name": "anihub-tauri",
+  "private": true,
+  "description": "AniHub — смотрим вместе. Нативное приложение (Tauri). Внутри — фронт-сервер на http://localhost:3000 (сам запускается, если выключен).",
+  "version": "1.0.0",
+  "dependencies": {
+    "@tauri-apps/cli": "^2.12.6"
+  }
+}

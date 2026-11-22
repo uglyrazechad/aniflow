@@ -1,4 +1,4 @@
-# AniFlow — аниме-сайт с плеером AnimeGO
+# AniHub — аниме-сайт с плеером AnimeGO
 
 Современный каталог аниме на Next.js (App Router) с поиском, подборками,
 адаптивной вёрсткой, тёмной темой по умолчанию и HLS-плеером.
@@ -74,7 +74,7 @@ SITE_URL=https://example.com
    Render прочитает `render.yaml` и создаст веб-сервис.
    Либо **New → Web Service** и вручную: build `npm ci --include=dev && npm run build`,
    start `npm start`, healthcheck `/api/health`.
-3. Готово: сайт открывается по адресу вида `https://aniflow.onrender.com`
+3. Готово: сайт открывается по адресу вида `https://anihub.onrender.com`
    с телефона, ноутбука и любого ПК.
 
 Бесплатный план Render засыпает после 15 минут без запросов, первый запуск после
@@ -90,7 +90,7 @@ SITE_URL=https://example.com
 2. На сервере с Docker:
 
 ```bash
-git clone <ваш-репозиторий> aniflow && cd aniflow
+git clone <ваш-репозиторий> anihub && cd anihub
 printf 'SITE_HOST=anime.example.com\n' > .env
 docker compose up -d --build
 ```
@@ -102,8 +102,8 @@ Caddy из `compose.yaml` сам получит HTTPS-сертификат и п
 Без домена можно запустить только приложение:
 
 ```bash
-docker build -t aniflow .
-docker run -d --name aniflow --restart unless-stopped -p 3000:3000 aniflow
+docker build -t anihub .
+docker run -d --name anihub --restart unless-stopped -p 3000:3000 anihub
 ```
 
 ### Vercel
@@ -153,6 +153,13 @@ types/anime.ts               общие типы
   отклоняет приватные адреса, поддерживает `Range` для MP4.
 - `GET /api/health` — проверка живости для хостинга и мониторинга.
 
+## Мобильное приложение
+
+В `mobile/` лежит Android-приложение на Expo/React Native: тот же каталог,
+плеер, аккаунты, избранное и комнаты совместного просмотра. Оно использует
+REST API и WebSocket сайта, поэтому сначала запустите сервер (`npm start`).
+Инструкции — в [`mobile/README.md`](mobile/README.md).
+
 ## Ограничения
 
 - AnimeGO может быть недоступен из некоторых сетей — тогда работает демо-режим.
@@ -161,3 +168,51 @@ types/anime.ts               общие типы
   сайта.
 - Разметка AnimeGO может меняться; парсеры стоит проверять после изменений.
 - Сайт не хранит видео: все материалы предоставляет AnimeGO.
+
+## Вход и регистрация
+
+- **Регистрация с подтверждением почты.** После выбора «Создать аккаунт»
+  аккаунт создаётся, а 6-значный код отправляется на почту. Проверьте входящие
+  (или папку «Спам»), введите код на странице `/verify-email`, и вход откроется.
+  Код живёт 15 минут, повторная отправка — кнопка «Отправить код повторно».
+  Если SMTP не настроен — подтверждение отключено и аккаунт сразу доступен
+  (в логах будет предупреждение).
+- **Вход.** Почта + пароль. Для неподтверждённой почты вход блокируется с
+  предложением проверить письмо.
+- **Сброс пароля.** Ссылка «Забыли пароль?» на странице входа → `/auth/reset-password`.
+  Введите почту → код из письма → новый пароль (дважды). Код живёт 15 минут.
+- **Вход через Яндекс ID.** Кнопка «Войти через Яндекс». Приложение
+  настраивается в окне [Яндекс OAuth2](https://oauth.yandex.ru/client/new)
+  и переменные `YANDEX_CLIENT_ID`, `YANDEX_CLIENT_SECRET`
+  (`YANDEX_REDIRECT_URI` — по умолчанию `<host>/api/auth/yandex/callback`).
+- **Вход через ВКонтакте (VK).** Кнопка «Войти через ВКонтакте (VK)».
+  Приложение создаётся в настройках VK Connect (`https://vk.com/editapp`),
+  переменные `VK_ID_CLIENT_ID`, `VK_ID_CLIENT_SECRET`
+  (`VK_ID_REDIRECT_URI` — по умолчанию `<host>/api/auth/vk/callback`).
+- **Письма через SMTP.** Все письма (подтверждение, сброс) уходят через
+  SMTP-сервер: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`,
+  `SMTP_FROM`, `SMTP_SECURE` (см. `.env.example`).
+
+### API-маршруты
+
+| Маршрут | Описание |
+| --- | --- |
+| `POST /api/auth/verify-email` | Подтверждение почты: `{ email, code }` → вход в аккаунт |
+| `POST /api/auth/resend-verify` | Повторная отправка: `{ email }` |
+| `POST /api/auth/request-reset` | Сброс: `{ email }` → код в письме |
+| `POST /api/auth/reset-password` | `{ code, newPassword }` → пароль изменён |
+| `GET /api/auth/yandex` | Редирект на авторизацию Яндекса |
+| `GET /api/auth/yandex/callback` | Обработка кода, создание/вход в аккаунт |
+| `GET /api/auth/vk` | Редирект на авторизацию ВКонтакте |
+| `GET /api/auth/vk/callback` | Обработка кода, создание/вход в аккаунт |
+
+## Аватар сайта
+
+Логотип шапки — видео `public/site-avatar.mp4` (взято из
+`C:\Users\user\Downloads\video (1).mp4`), воспроизводится бесконечно.
+
+## Тема
+
+Основной цвет — золотистый (`--primary`), кнопки — золотие с тёмным текстом.
+Профилировочные акценты (`brand`) — тоже в золотистом спектре.
+

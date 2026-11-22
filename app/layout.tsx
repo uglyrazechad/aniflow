@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 
-import { SiteFooter } from '@/components/site-footer';
-import { SiteHeader } from '@/components/site-header';
+import { PwaRegistration } from '@/components/pwa-registration';
+import { SiteChrome } from '@/components/site-chrome';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/toaster';
 
@@ -18,8 +18,8 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'AniFlow — аниме онлайн с плеером AnimeGO',
-    template: '%s · AniFlow',
+    default: 'AniHub — аниме онлайн с плеером AnimeGO',
+    template: '%s · AniHub',
   },
   description:
     'Современный каталог аниме с поиском, подборками и встроенным плеером AnimeGO. Тёмная тема, адаптивный интерфейс, выбор озвучки и качества.',
@@ -27,8 +27,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'ru_RU',
-    siteName: 'AniFlow',
-    title: 'AniFlow — аниме онлайн',
+    siteName: 'AniHub',
+    title: 'AniHub — аниме онлайн',
     description: 'Каталог аниме и плеер AnimeGO в аккуратном интерфейсе.',
   },
 };
@@ -51,11 +51,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           disableTransitionOnChange
         >
           <div className="flex min-h-screen flex-col">
-            <SiteHeader />
-            <main className="flex-1">{children}</main>
-            <SiteFooter />
+            <SiteChrome>{children}</SiteChrome>
           </div>
           <Toaster />
+          <PwaRegistration />
         </ThemeProvider>
       </body>
     </html>

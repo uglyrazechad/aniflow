@@ -7,13 +7,14 @@ import { Play, Star } from 'lucide-react';
 import { Poster } from '@/components/poster';
 import { Badge } from '@/components/ui/badge';
 import type { AnimeSummary } from '@/types/anime';
-import { formatRating, formatYear, typeLabel } from '@/lib/utils';
+import { cn, formatRating, formatYear, typeLabel } from '@/lib/utils';
 
 interface AnimeCardProps {
   anime: AnimeSummary;
+  rank?: number;
 }
 
-export function AnimeCard({ anime }: AnimeCardProps) {
+export function AnimeCard({ anime, rank }: AnimeCardProps) {
   const rating = formatRating(anime.rating);
   const meta = [
     formatYear(anime.year),
@@ -30,7 +31,7 @@ export function AnimeCard({ anime }: AnimeCardProps) {
       className="group relative h-full"
     >
       {/* Свечение под карточкой */}
-      <div className="pointer-events-none absolute -inset-1 rounded-[1.4rem] bg-gradient-to-br from-brand-500/45 via-primary/20 to-teal-400/40 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="pointer-events-none absolute -inset-1 rounded-[1.4rem] bg-gradient-to-br from-brand-500/45 via-primary/20 to-brand-300/40 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
 
       <Link
         href={`/anime/${anime.id}`}
@@ -71,6 +72,20 @@ export function AnimeCard({ anime }: AnimeCardProps) {
           {anime.translations && anime.translations.length > 1 ? (
             <span className="absolute bottom-2 right-2 rounded-full border border-white/10 bg-black/50 px-2 py-0.5 text-[10px] text-white/75 backdrop-blur-md">
               {anime.translations.length} озвучки
+            </span>
+          ) : null}
+
+          {rank ? (
+            <span
+              className={cn(
+                'absolute bottom-2 left-2 flex h-8 min-w-8 items-center justify-center rounded-xl border px-1.5 text-sm font-black tabular-nums backdrop-blur-md',
+                rank <= 3
+                  ? 'border-amber-200/50 bg-gradient-to-br from-amber-300 to-orange-500 text-black shadow-[0_6px_20px_-6px_rgba(251,191,36,0.9)]'
+                  : 'border-white/15 bg-black/60 text-white',
+              )}
+              aria-label={`Место ${rank}`}
+            >
+              {rank}
             </span>
           ) : null}
         </div>

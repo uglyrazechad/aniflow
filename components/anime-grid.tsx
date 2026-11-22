@@ -27,9 +27,12 @@ const item = {
 
 export function AnimeGrid({
   items,
+  rankStart,
   className,
 }: {
   items: AnimeSummary[];
+  /** Если задан, на карточках рисуется место в рейтинге. */
+  rankStart?: number;
   className?: string;
 }) {
   return (
@@ -39,9 +42,9 @@ export function AnimeGrid({
       animate="show"
       className={cn(gridClassName, className)}
     >
-      {items.map((anime) => (
+      {items.map((anime, index) => (
         <motion.div key={anime.id} variants={item} className="h-full">
-          <AnimeCard anime={anime} />
+          <AnimeCard anime={anime} rank={rankStart ? rankStart + index : undefined} />
         </motion.div>
       ))}
     </motion.div>

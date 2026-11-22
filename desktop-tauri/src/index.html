@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>AniHub</title>
+    <style>
+      body { font-family: system-ui; display: flex; align-items: center; justify-content: center; height: 100vh; background: #08080d; color: #9ca3af; margin: 0; }
+      .msg { text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div class="msg">
+      <h1>AniHub</h1>
+      <p>Подождите — сервер запускается…</p>
+    </div>
+    <script>
+      // В нормальной работе Tauri окно открывает devUrl (http://localhost:3000/),
+      // и именно там находится настоящий интерфейс. Скрипт ниже — подстраховка:
+      // если devUrl всё ещё недоступен, указываем пользователю, откуда скачать приложение.
+      setTimeout(() => {
+        try {
+          fetch('http://localhost:3000/', { mode: 'no-cors', method: 'GET' });
+        } catch {
+          /* front ещё не готов — перезагрузка не требуется, Tauri загрузит его */
+        }
+      }, 500);
+    </script>
+  </body>
+</html>

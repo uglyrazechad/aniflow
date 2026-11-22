@@ -1,5 +1,6 @@
 # dependencies
-/node_modules
+node_modules/
+/desktop/node_modules
 /.pnp
 .pnp.*
 
@@ -27,6 +28,20 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# expo / react native
+/mobile/.expo
+/mobile/dist
+/mobile/android
+/mobile/ios
+/mobile/web-build
+
+# rust / tauri build output
+/desktop-tauri/target
+/desktop-tauri/100
+
+# скачанные бинарники туннеля
+/tools/cloudflared.exe
 
 # локальная база аккаунтов и загруженные картинки
 /data

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Loader2, Lock, Mail, User } from 'lucide-react';
+import { KeyRound, Loader2, Lock, Mail, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -40,9 +40,19 @@ export function AuthForm({ mode, next }: AuthFormProps) {
         ),
       });
 
-      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      const data = (await response.json().catch(() => ({}))) as {
+        error?: string;
+        needsVerification?: boolean;
+      };
       if (!response.ok) {
         toast.error(data.error || 'Не получилось. Попробуйте ещё раз');
+        return;
+      }
+
+      if (data.needsVerification) {
+        toast.success('Проверьте почту — код отправлен');
+        router.push('/verify-email');
+        router.refresh();
         return;
       }
 
@@ -114,6 +124,30 @@ export function AuthForm({ mode, next }: AuthFormProps) {
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         {isRegister ? 'Создать аккаунт' : 'Войти'}
       </Button>
+
+      {!isRegister ? (
+        <Link
+          href="/auth/reset-password"
+          className="text-xs text-muted-foreground hover:text-primary"
+        >
+          Забыли пароль?
+        </Link>
+      ) : null}
+
+      <div className="space-y-2">
+        <Button asChild variant="outline" className="w-full">
+          <Link href="/api/auth/yandex">
+            <KeyRound className="h-4 w-4" />
+            Войти через Яндекс
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="w-full">
+          <Link href="/api/auth/vk">
+            <KeyRound className="h-4 w-4" />
+            Войти через ВКонтакте (VK)
+          </Link>
+        </Button>
+      </div>
 
       <p className="text-center text-xs text-muted-foreground">
         {isRegister ? 'Уже есть аккаунт? ' : 'Нет аккаунта? '}

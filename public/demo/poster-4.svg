@@ -35,7 +35,7 @@
     <text x="48" y="72" font-size="17" letter-spacing="6" opacity="0.65">2020</text>
     <text x="48" y="676" font-size="54" font-weight="800" letter-spacing="-1">МАГИЧЕСКАЯ</text>
     <text x="48" y="738" font-size="40" font-weight="700" opacity="0.86">БИТВА</text>
-    <text x="48" y="800" font-size="15" letter-spacing="4" opacity="0.5">ANIFLOW · DEMO</text>
+    <text x="48" y="800" font-size="15" letter-spacing="4" opacity="0.5">ANIHUB · DEMO</text>
   </g>
 
   <rect x="24" y="24" width="552" height="852" fill="none" stroke="#ffffff" stroke-opacity="0.12" rx="18"/>

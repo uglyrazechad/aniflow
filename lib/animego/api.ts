@@ -4,6 +4,7 @@ import type {
   AnimeDetails,
   AnimeSummary,
   CatalogSection,
+  DataSource,
   HomeData,
   PlayerPayload,
   SearchResult,
@@ -25,6 +26,17 @@ const SEARCH_TTL_MS = 5 * 60 * 1000;
 const LIST_TTL_MS = 15 * 60 * 1000;
 const DETAILS_TTL_MS = 30 * 60 * 1000;
 const PLAYER_TTL_MS = 3 * 60 * 1000;
+
+export const TOP_PAGE_SIZE = 25;
+export const TOP_TOTAL = 250;
+export const TOP_PAGES = Math.ceil(TOP_TOTAL / TOP_PAGE_SIZE);
+
+export interface TopPage {
+  items: AnimeSummary[];
+  page: number;
+  pages: number;
+  total: number;
+}
 
 export { AnimeGoError };
 
@@ -58,20 +70,23 @@ async function fetchHome(): Promise<HomeData> {
     {
       key: 'popular',
       title: 'Популярное',
-      subtitle: 'Топ-250 AnimeGO',
+      subtitle: 'Топ-250 AniHub',
       path: '/anime/top-250',
+      href: '/top',
     },
     {
       key: 'new',
       title: 'Новинки сезона',
       subtitle: 'Свежие тайтлы текущего сезона',
       path: `/anime/season/${year}`,
+      href: '/search',
     },
     {
       key: 'ongoing',
       title: 'Онгоинги',
       subtitle: 'Сейчас выходят новые серии',
       path: '/anime/status/ongoing',
+      href: '/search',
     },
   ];
 
@@ -88,7 +103,7 @@ async function fetchHome(): Promise<HomeData> {
       key: definition.key,
       title: definition.title,
       subtitle: definition.subtitle,
-      href: '/search',
+      href: definition.href,
       items: result.value,
     });
   });
@@ -112,6 +127,102 @@ async function fetchHome(): Promise<HomeData> {
 
 export function loadHome(): Promise<HomeData> {
   return cached('home', LIST_TTL_MS, fetchHome);
+}
+
+/**
+ * Топ-250 AniHub: рейтинг берётся из раздела `/anime/top-250` на AnimeGO.
+ * На странице 25 тайтлов, всего 10 страниц; кэш обновляется каждые 15 минут.
+ */
+export function loadTop(page: number): Promise<TopPage> {
+  const safePage = Math.min(Math.max(Math.trunc(page) || 1, 1), TOP_PAGES);
+
+  return cached(`top:${safePage}`, LIST_TTL_MS, async () => {
+    const url =
+      safePage === 1
+        ? `${ANIMEGO_BASE}/anime/top-250`
+        : `${ANIMEGO_BASE}/anime/top-250/${safePage}`;
+    const html = await fetchHtml(url);
+    const cards = parseCards(cheerio.load(html), TOP_PAGE_SIZE + 5);
+    const items = cards
+      .slice(0, TOP_PAGE_SIZE)
+      .map(({ animeId: _animeId, ...summary }) => summary);
+
+    return { items, page: safePage, pages: TOP_PAGES, total: TOP_TOTAL } satisfies TopPage;
+  });
+}
+
+export interface CatalogPage {
+  items: AnimeSummary[];
+  page: number;
+  hasMore: boolean;
+  source: DataSource;
+}
+
+/** Слаги проверены на AnimeGO (все отдают 200). */
+export const CATALOG_GENRES = [
+  { slug: 'action', title: 'Экшен' },
+  { slug: 'adventure', title: 'Приключения' },
+  { slug: 'comedy', title: 'Комедия' },
+  { slug: 'drama', title: 'Драма' },
+  { slug: 'fantasy', title: 'Фэнтези' },
+  { slug: 'romance', title: 'Романтика' },
+  { slug: 'sci-fi', title: 'Фантастика' },
+  { slug: 'mystery', title: 'Детектив' },
+  { slug: 'shounen', title: 'Сёнэн' },
+  { slug: 'seinen', title: 'Сэйнэн' },
+  { slug: 'school', title: 'Школа' },
+  { slug: 'isekai', title: 'Исекай' },
+  { slug: 'mecha', title: 'Меха' },
+  { slug: 'supernatural', title: 'Сверхъестественное' },
+  { slug: 'horror', title: 'Ужасы' },
+  { slug: 'psychological', title: 'Психологическое' },
+  { slug: 'military', title: 'Военное' },
+  { slug: 'historical', title: 'Историческое' },
+  { slug: 'music', title: 'Музыка' },
+  { slug: 'sports', title: 'Спорт' },
+  { slug: 'slice-of-life', title: 'Повседневность' },
+  { slug: 'detective', title: 'Расследование' },
+] as const;
+
+export const CATALOG_STATUSES = [
+  { slug: 'ongoing', title: 'Онгоинги' },
+  { slug: 'released', title: 'Вышедшие' },
+] as const;
+
+const SLUG_RE = /^[a-z0-9-]{2,40}$/;
+
+/**
+ * Страница каталога: жанр, сезон года или статус.
+ * AnimeGO игнорирует `?year[]=` при постраничном выводе, поэтому год отдаёт `/anime/season/<year>`.
+ */
+export function loadCatalog(filter: {
+  genre?: string;
+  year?: number;
+  status?: string;
+  page?: number;
+  limit?: number;
+}): Promise<CatalogPage> {
+  const page = Math.min(Math.max(Math.trunc(filter.page ?? 1) || 1, 1), 50);
+  const limit = Math.min(Math.max(Math.trunc(filter.limit ?? 24) || 24, 1), 48);
+  const genre = filter.genre && SLUG_RE.test(filter.genre) ? filter.genre : undefined;
+  const status = filter.status && SLUG_RE.test(filter.status) ? filter.status : undefined;
+  const year = filter.year && filter.year >= 1990 && filter.year <= 2100 ? Math.trunc(filter.year) : undefined;
+
+  let path = '/anime';
+  if (genre) path = `/anime/genre/${genre}${page > 1 ? `/${page}` : ''}`;
+  else if (status) path = `/anime/status/${status}${page > 1 ? `/${page}` : ''}`;
+  else if (year) path = `/anime/season/${year}${page > 1 ? `/${page}` : ''}`;
+  else if (page > 1) path = `/anime/${page}`;
+
+  return cached(`catalog:${path}:${limit}`, LIST_TTL_MS, async () => {
+    const items = await loadCards(`${ANIMEGO_BASE}${path}`, limit + 1);
+    return {
+      items: items.slice(0, limit),
+      page,
+      hasMore: items.length > limit,
+      source: 'animego',
+    } satisfies CatalogPage;
+  });
 }
 
 function buildSeasons(episodesTotal: number): AnimeDetails['seasons'] {

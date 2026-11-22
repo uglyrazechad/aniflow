@@ -29,6 +29,11 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link href="/top" className="transition-colors hover:text-foreground">
+                Топ-250
+              </Link>
+            </li>
+            <li>
               <Link href="/#popular" className="transition-colors hover:text-foreground">
                 Популярное
               </Link>
@@ -72,7 +77,7 @@ export function SiteFooter() {
 
       <div className="border-t border-border/60">
         <div className="container flex flex-col gap-2 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} AniFlow. Демонстрационный проект.</p>
+          <p>© {new Date().getFullYear()} AniHub. Демонстрационный проект.</p>
           <p>Все видео предоставляются сервисом AnimeGO. Сайт не хранит видеоматериалы.</p>
         </div>
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   AlertTriangle,
@@ -44,6 +44,20 @@ interface VideoPlayerProps {
   onProgress?: (time: number, duration: number) => void;
   onEnded?: () => void;
   className?: string;
+  /** Императивный handle плеера (play/pause/seek). */
+  handleRef?: React.Ref<VideoPlayerHandle>;
+  onPlay?: () => void;
+  onPause?: () => void;
+  onSeek?: (time: number) => void;
+}
+
+export interface VideoPlayerHandle {
+  play: () => void;
+  pause: () => void;
+  seek: (time: number) => void;
+  getTime: () => number;
+  isPlaying: () => boolean;
+  setQuality: (height: number) => void;
 }
 
 interface QualityLevel {
@@ -51,19 +65,25 @@ interface QualityLevel {
   index: number;
 }
 
-export function VideoPlayer({
-  title,
-  subtitle,
-  poster,
-  src,
-  type = 'hls',
-  autoPlay = false,
-  initialTime = 0,
-  intro,
-  onProgress,
-  onEnded,
-  className,
-}: VideoPlayerProps) {
+export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(function VideoPlayer(
+  {
+    title,
+    subtitle,
+    poster,
+    src,
+    type = 'hls',
+    autoPlay = false,
+    initialTime = 0,
+    intro,
+    onProgress,
+    onEnded,
+    className,
+    onPlay,
+    onPause,
+    onSeek,
+  },
+  playerRef,
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -290,7 +310,30 @@ export function VideoPlayer({
     const next = Math.min(Math.max(time, 0), max);
     video.currentTime = next;
     setCurrentTime(next);
-  }, []);
+    onSeek?.(next);
+  }, [onSeek]);
+
+  useImperativeHandle(
+    playerRef,
+    () => ({
+      play: () => {
+        // Программный запуск (синхронизация комнаты). Автовоспроизведение может
+        // быть заблокировано — это не ошибка, большой Play остаётся на экране.
+        void videoRef.current?.play().catch(() => undefined);
+      },
+      pause: () => {
+        videoRef.current?.pause();
+      },
+      seek: (time: number) => seekTo(time),
+      getTime: () => videoRef.current?.currentTime ?? 0,
+      isPlaying: () => videoRef.current?.paused === false,
+      setQuality: (height: number) => {
+        const index = levels.find((level) => level.height === height)?.index;
+        if (index != null) applyLevel(index);
+      },
+    }),
+    [togglePlay, seekTo, levels, applyLevel],
+  );
 
   const seekBy = useCallback(
     (delta: number) => {
@@ -367,7 +410,7 @@ export function VideoPlayer({
     intro != null &&
     currentTime >= intro.start &&
     currentTime < intro.end - 1 &&
-    (duration === 0 || intro.end < duration * 0.5);
+    (duration === 0 || intro.end < duration);
 
   const selectedQuality =
     selectedLevel >= 0
@@ -404,11 +447,13 @@ export function VideoPlayer({
           void togglePlay();
         }}
         onPlay={() => {
+          onPlay?.();
           setPlaying(true);
           setStarted(true);
           playbackRef.current.playing = true;
         }}
         onPause={() => {
+          onPause?.();
           setPlaying(false);
           playbackRef.current.playing = false;
           const video = videoRef.current;
@@ -562,7 +607,7 @@ export function VideoPlayer({
               style={{ width: `${Math.min(bufferedPercent, 100)}%` }}
             />
             <div
-              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-400 to-teal-400"
+              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-400 to-brand-300"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -702,4 +747,4 @@ export function VideoPlayer({
       </div>
     </div>
   );
-}
+});

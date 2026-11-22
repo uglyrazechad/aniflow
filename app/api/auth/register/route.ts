@@ -10,6 +10,7 @@ import {
   toSafeUser,
 } from '@/lib/server/auth';
 import { db, emailTaken, flush, type UserRecord } from '@/lib/server/db';
+import { mailLinkBase, generateCode, sendMail } from '@/lib/server/mail';
 import { clientKey, rateLimit } from '@/lib/server/rate-limit';
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i;
@@ -56,13 +57,42 @@ export async function POST(request: Request) {
     profile: defaultProfile(displayName),
     progress: {},
     favorites: [],
+    emailVerified: false,
+    emailCode: null,
+    emailCodeExpiresAt: null,
+    resetCode: null,
+    resetExpiresAt: 0,
+    provider: null,
+    providerId: null,
   };
 
   db().users.push(user);
   flush();
 
+  // Подтверждение почты с помощью кода. Если SMTP не настроен — считаем,
+  // что условие выполнено, чтобы регистрация не зависла без входа в систему.
+  const code = generateCode();
+  user.emailCode = code;
+  user.emailCodeExpiresAt = Date.now() + 15 * 60 * 1000;
+  flush();
+
+  const mailResult = await sendMail({
+    to: email,
+    subject: 'AniHub — код подтверждения почты',
+    text: `Ваш код: ${code}\nСсылка: ${mailLinkBase()}/verify-email?code=${code}&email=${encodeURIComponent(email)}`,
+  });
+  if (mailResult.error === 'SMTP_NOT_CONFIGURED') {
+    user.emailVerified = true;
+    user.emailCode = null;
+    user.emailCodeExpiresAt = null;
+    flush();
+  }
+
   const session = createSession(user.id);
   await setSessionCookie(session.token, session.expiresAt);
 
-  return NextResponse.json({ user: toSafeUser(user) }, { status: 201 });
+  return NextResponse.json(
+    { user: toSafeUser(user), needsVerification: !user.emailVerified },
+    { status: 201 },
+  );
 }
