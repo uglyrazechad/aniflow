@@ -132,7 +132,12 @@ export default function HomeScreen() {
           style={({ pressed }) => [styles.hero, pressed && styles.pressed]}
         >
           {featured.posterUrl ? (
-            <Image source={{ uri: featured.posterUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
+            <Image
+              source={{ uri: featured.posterUrl }}
+              style={StyleSheet.absoluteFill}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+            />
           ) : null}
           <View style={styles.heroShade} />
           <View style={styles.heroBody}>
@@ -186,7 +191,13 @@ export default function HomeScreen() {
                 style={({ pressed }) => [styles.continueCard, pressed && styles.pressed]}
               >
                 {item.posterUrl ? (
-                  <Image source={{ uri: item.posterUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
+                  <Image
+                    source={{ uri: item.posterUrl }}
+                    style={StyleSheet.absoluteFill}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                    recyclingKey={item.id}
+                  />
                 ) : null}
                 <View style={styles.continueShade} />
                 <Text style={styles.continueTitle} numberOfLines={2}>

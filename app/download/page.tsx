@@ -25,7 +25,7 @@ export default function DownloadPage() {
           <div className="space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full border border-brand-400/30 bg-brand-400/10 px-3 py-1 text-xs font-medium text-brand-300">
               <Smartphone className="h-3.5 w-3.5" />
-              Android · версия 0.1.0
+              Android · версия 0.1.1
             </div>
 
             <div className="space-y-3">
@@ -63,7 +63,7 @@ export default function DownloadPage() {
                 Без рекламы и трекеров
               </span>
               <span>Android 7.0+</span>
-              <span>~60 МБ</span>
+              <span>~48 МБ</span>
             </div>
           </div>
 
@@ -99,6 +99,27 @@ export default function DownloadPage() {
           title="Войдите в аккаунт"
           text="Регистрация та же, что на сайте. Комнаты, избранное и история появятся автоматически."
         />
+      </section>
+
+      <section className="rounded-3xl border border-border/60 bg-card/40 p-6">
+        <h2 className="text-lg font-semibold">Если Android не даёт установить</h2>
+        <ul className="mt-3 space-y-2 text-sm leading-relaxed text-muted-foreground">
+          <li>
+            <span className="text-foreground">«Файл может быть опасен» / Play Protect.</span>{' '}
+            Нажмите «Всё равно установить» (или ⋮ → «Установить без проверки»). APK
+            собран из исходников проекта, без рекламы и трекеров.
+          </li>
+          <li>
+            <span className="text-foreground">«Приложения из этого источника запрещены».</span>{' '}
+            Настройки → Приложения → Специальный доступ → Установка неизвестных
+            приложений → выберите браузер (Chrome) → «Разрешить».
+          </li>
+          <li>
+            <span className="text-foreground">Скачивать на телефоне проще всего по QR-коду</span>{' '}
+            вверху страницы: откройте ссылку на сайте и нажмите «Скачать APK». Файл
+            появится в «Загрузках» (Chrome → ⋮ → Загрузки).
+          </li>
+        </ul>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">

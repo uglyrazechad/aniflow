@@ -28,6 +28,8 @@ export function AnimeCard({ anime, width = 124, style, subtitle }: Props) {
             style={StyleSheet.absoluteFill}
             contentFit="cover"
             transition={180}
+            cachePolicy="memory-disk"
+            recyclingKey={anime.id}
           />
         ) : (
           <View style={[StyleSheet.absoluteFill, styles.posterFallback]}>

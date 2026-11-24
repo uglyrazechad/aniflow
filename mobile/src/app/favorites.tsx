@@ -75,6 +75,9 @@ export default function FavoritesScreen() {
           data={items}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
+          initialNumToRender={8}
+          windowSize={5}
+          removeClippedSubviews
           renderItem={({ item }) => (
             <Pressable
               onPress={() => router.push(`/anime/${item.id}`)}
@@ -82,7 +85,13 @@ export default function FavoritesScreen() {
             >
               <View style={styles.poster}>
                 {item.posterUrl ? (
-                  <Image source={{ uri: item.posterUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
+                  <Image
+                    source={{ uri: item.posterUrl }}
+                    style={StyleSheet.absoluteFill}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                    recyclingKey={item.id}
+                  />
                 ) : null}
               </View>
               <View style={styles.info}>

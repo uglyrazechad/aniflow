@@ -153,7 +153,12 @@ export default function CreateRoomScreen() {
           <View style={styles.selected}>
             <View style={styles.poster}>
               {selected.posterUrl ? (
-                <Image source={{ uri: selected.posterUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
+                <Image
+                  source={{ uri: selected.posterUrl }}
+                  style={StyleSheet.absoluteFill}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                />
               ) : null}
             </View>
             <View style={styles.selectedInfo}>
@@ -187,7 +192,13 @@ export default function CreateRoomScreen() {
                   >
                     <View style={styles.resultPoster}>
                       {anime.posterUrl ? (
-                        <Image source={{ uri: anime.posterUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
+                        <Image
+                          source={{ uri: anime.posterUrl }}
+                          style={StyleSheet.absoluteFill}
+                          contentFit="cover"
+                          cachePolicy="memory-disk"
+                          recyclingKey={anime.id}
+                        />
                       ) : null}
                     </View>
                     <View style={styles.resultInfo}>
