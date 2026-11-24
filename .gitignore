@@ -35,6 +35,11 @@ yarn-error.log*
 /mobile/android
 /mobile/ios
 /mobile/web-build
+/mobile/web-dist
+
+# windows desktop (electron)
+/desktop/web
+/desktop/release
 
 # rust / tauri build output
 /desktop-tauri/target

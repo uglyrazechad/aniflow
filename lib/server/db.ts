@@ -8,6 +8,9 @@ export type { FavoriteEntry, Profile };
 
 export type SocialProvider = 'yandex' | 'vk';
 
+/** Где заведён аккаунт: на сайте или в приложениях (.exe/.apk). Данные двух миров не пересекаются. */
+export type UserSpace = 'site' | 'app';
+
 export interface UserRecord {
   id: string;
   email: string;
@@ -24,6 +27,8 @@ export interface UserRecord {
   resetExpiresAt: number | null;
   provider: SocialProvider | null;
   providerId: string | null;
+  /** Пространство аккаунта. Старые записи без поля считаются сайтовыми. */
+  space?: UserSpace;
   /** Expo push-токены устройств (мобильное приложение). */
   pushTokens?: string[];
 }
@@ -66,6 +71,7 @@ function normalize(input: unknown): Database {
           resetExpiresAt: user.resetExpiresAt ?? 0,
           provider: user.provider ?? null,
           providerId: user.providerId ?? null,
+          space: user.space === 'app' ? 'app' : 'site',
           pushTokens: Array.isArray(user.pushTokens)
             ? user.pushTokens.filter((token): token is string => typeof token === 'string').slice(-5)
             : [],
@@ -113,22 +119,31 @@ export function findUserById(id: string): UserRecord | undefined {
   return db().users.find((user) => user.id === id);
 }
 
-export function findUserByEmail(email: string): UserRecord | undefined {
+const spaceOf = (user: UserRecord): UserSpace => (user.space === 'app' ? 'app' : 'site');
+
+export function findUserByEmail(
+  email: string,
+  space: UserSpace | 'any' = 'site',
+): UserRecord | undefined {
   const needle = email.trim().toLowerCase();
-  return db().users.find((user) => user.email.toLowerCase() === needle);
+  return db().users.find(
+    (user) => (space === 'any' || spaceOf(user) === space) && user.email.toLowerCase() === needle,
+  );
 }
 
-export function findUserByUsername(username: string): UserRecord | undefined {
+export function findUserByUsername(username: string, space: UserSpace = 'site'): UserRecord | undefined {
   const needle = username.trim().toLowerCase();
-  return db().users.find((user) => user.username.toLowerCase() === needle);
+  return db().users.find(
+    (user) => spaceOf(user) === space && user.username.toLowerCase() === needle,
+  );
 }
 
 export function findUserByProvider(provider: SocialProvider, providerId: string): UserRecord | undefined {
   return db().users.find((user) => user.provider === provider && user.providerId === providerId);
 }
 
-export function emailTaken(email: string): boolean {
-  return Boolean(findUserByEmail(email));
+export function emailTaken(email: string, space: UserSpace = 'site'): boolean {
+  return Boolean(findUserByEmail(email, space));
 }
 
 export function usernameTaken(username: string): boolean {

@@ -10,7 +10,13 @@ const MAX_PROGRESS = 40;
 
 export async function readToken(): Promise<string | null> {
   try {
-    return await SecureStore.getItemAsync(TOKEN_KEY);
+    const stored = await SecureStore.getItemAsync(TOKEN_KEY);
+    if (stored) return stored;
+  } catch {
+    /* на веб-платформе SecureStore недоступен — берём localStorage */
+  }
+  try {
+    return await AsyncStorage.getItem(TOKEN_KEY);
   } catch {
     return null;
   }
@@ -21,7 +27,13 @@ export async function writeToken(token: string | null): Promise<void> {
     if (token) await SecureStore.setItemAsync(TOKEN_KEY, token);
     else await SecureStore.deleteItemAsync(TOKEN_KEY);
   } catch {
-    /* на веб-платформе SecureStore недоступен — токен просто не сохранится */
+    /* на веб-платформе SecureStore недоступен — токен храним в localStorage */
+  }
+  try {
+    if (token) await AsyncStorage.setItem(TOKEN_KEY, token);
+    else await AsyncStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* ignore */
   }
 }
 

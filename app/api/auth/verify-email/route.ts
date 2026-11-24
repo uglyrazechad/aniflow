@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Введите почту и код' }, { status: 400 });
   }
 
-  const user = findUserByEmail(email);
+  const user = findUserByEmail(email, 'any');
   if (
     !user ||
     user.emailCode !== code ||
@@ -37,8 +37,11 @@ export async function POST(request: Request) {
   user.emailCodeExpiresAt = null;
   flush();
 
-  const session = createSession(user.id);
-  await setSessionCookie(session.token, session.expiresAt);
+  /* Аккаунт приложения подтверждаем, но cookie сайта ему не выдаём. */
+  if (user.space !== 'app') {
+    const session = createSession(user.id);
+    await setSessionCookie(session.token, session.expiresAt);
+  }
 
   return NextResponse.json({ user: toSafeUser(user), verified: true });
 }

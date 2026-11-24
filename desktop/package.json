@@ -1,13 +1,49 @@
 {
-  "name": "ani-hub-desktop",
-  "version": "1.0.0",
+  "name": "anihub-desktop",
+  "productName": "AniHub",
+  "version": "0.1.2",
+  "description": "AniHub для Windows: каталог, плеер и комнаты совместного просмотра",
+  "author": "AniHub",
+  "license": "UNLICENSED",
   "private": true,
-  "description": "Desktop-версия AniHub — открывает сайт как отдельное приложение.",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder --win nsis portable"
   },
   "devDependencies": {
-    "electron": "^35"
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.anihub.desktop",
+    "productName": "AniHub",
+    "asar": true,
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "web/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "AniHub",
+      "artifactName": "anihub-setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "anihub-windows.${ext}"
+    }
   }
 }

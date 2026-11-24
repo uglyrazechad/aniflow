@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Введите почту' }, { status: 400 });
   }
 
-  const user = findUserByEmail(email);
+  const user = findUserByEmail(email, 'any');
   if (user && !user.emailVerified) {
     const code = generateCode();
     user.emailCode = code;

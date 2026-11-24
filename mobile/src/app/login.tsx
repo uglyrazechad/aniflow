@@ -35,7 +35,7 @@ export default function LoginScreen() {
           Ani<Text style={styles.accent}>Hub</Text>
         </Text>
         <Text style={styles.title}>С возвращением</Text>
-        <Text style={styles.subtitle}>Аккаунт сайта подходит и для приложения.</Text>
+        <Text style={styles.subtitle}>Аккаунт приложения — отдельный от сайта.</Text>
       </View>
 
       <View style={styles.form}>

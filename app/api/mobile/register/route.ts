@@ -43,8 +43,14 @@ export async function POST(request: Request) {
   if (displayName.length > 40) {
     return NextResponse.json({ error: 'Имя длиннее 40 символов' }, { status: 400 });
   }
-  if (emailTaken(email)) {
-    return NextResponse.json({ error: 'Такая почта уже зарегистрирована' }, { status: 409 });
+  if (emailTaken(email, 'app')) {
+    return NextResponse.json({ error: 'Такая почта уже зарегистрирована в приложении' }, { status: 409 });
+  }
+  if (emailTaken(email, 'site')) {
+    return NextResponse.json(
+      { error: 'Эта почта занята на сайте. Для приложения укажите другой адрес.' },
+      { status: 409 },
+    );
   }
 
   const username = makeUsername(email, (value) =>
@@ -67,6 +73,7 @@ export async function POST(request: Request) {
     resetExpiresAt: 0,
     provider: null,
     providerId: null,
+    space: 'app',
     pushTokens: [],
   };
 

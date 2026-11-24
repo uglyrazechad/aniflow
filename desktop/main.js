@@ -1,54 +1,86 @@
-const { app, BrowserWindow, Menu } = require('electron');
-const { spawn } = require('child_process');
-const net = require('net');
-const path = require('path');
+const { app: electronApp, BrowserWindow, protocol, net, shell } = require('electron');
+const fs = require('node:fs');
+const path = require('node:path');
+const { pathToFileURL } = require('node:url');
 
-/**
- * Порт фронт-сервера (на машине): 3000.
- */
-function portUp(port) {
-  return new Promise((resolve) => {
-    const s = net.connect(port, '127.0.0.1');
-    s.on('connect', () => { s.destroy(); resolve(true); });
-    s.on('error', () => resolve(false));
-  });
-}
+const SCHEME = 'app';
+const WEB_ROOT = path.join(__dirname, 'web');
+const ENTRY = path.join(WEB_ROOT, 'index.html');
 
-/**
- * Автономность приложения: стартуем фронт (node server.mjs), если он выключен.
- * Фронт сам тоже стартует electron — нет цикла.
- */
-function ensureFront() {
-  portUp(3000).then((up) => {
-    if (!up) {
-      spawn(process.execPath, ['server.mjs'], { cwd: path.join(__dirname, '..'), windowsHide: true });
-    }
-  });
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: SCHEME,
+    privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true },
+  },
+]);
+
+/** Любой путь внутри app:// отдаётся из локальной сборки, а неизвестные — на index.html. */
+function resolveFile(pathname) {
+  const clean = decodeURIComponent(pathname).replace(/^\/+/, '');
+  const candidate = path.join(WEB_ROOT, clean);
+  if (!candidate.startsWith(WEB_ROOT)) return ENTRY;
+  if (clean && fs.existsSync(candidate) && fs.statSync(candidate).isFile()) return candidate;
+  return ENTRY;
 }
 
 function createWindow() {
   const win = new BrowserWindow({
-    title: 'AniHub',
-    icon: path.join(__dirname, '..', 'public', 'brand', 'anihub-icon-512.png'),
-    width: 1440,
-    height: 900,
-    minWidth: 960,
+    width: 1280,
+    height: 820,
+    minWidth: 900,
     minHeight: 600,
+    title: 'AniHub',
+    backgroundColor: '#0b0b12',
+    autoHideMenuBar: true,
+    icon: path.join(__dirname, 'build', 'icon.ico'),
     webPreferences: {
       contextIsolation: true,
+      nodeIntegration: false,
       sandbox: true,
+      spellcheck: false,
     },
   });
 
-  win.loadURL('http://localhost:3000/');
+  win.setMenuBarVisibility(false);
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^https?:/i.test(url)) shell.openExternal(url);
+    return { action: 'deny' };
+  });
+  win.webContents.on('will-navigate', (event, url) => {
+    if (!url.startsWith(`${SCHEME}://`)) {
+      event.preventDefault();
+      if (/^https?:/i.test(url)) shell.openExternal(url);
+    }
+  });
+
+  win.loadURL(`${SCHEME}://local/index.html`);
+  return win;
 }
 
-app.whenReady().then(() => {
-  Menu.setApplicationMenu(null);
-  ensureFront();
-  createWindow();
-});
+if (!electronApp.requestSingleInstanceLock()) {
+  electronApp.quit();
+} else {
+  electronApp.on('second-instance', () => {
+    const [win] = BrowserWindow.getAllWindows();
+    if (!win) return;
+    if (win.isMinimized()) win.restore();
+    win.focus();
+  });
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
+  electronApp.whenReady().then(() => {
+    protocol.handle(SCHEME, (request) => {
+      const url = new URL(request.url);
+      return net.fetch(pathToFileURL(resolveFile(url.pathname)).toString());
+    });
+
+    createWindow();
+
+    electronApp.on('activate', () => {
+      if (!BrowserWindow.getAllWindows().length) createWindow();
+    });
+  });
+
+  electronApp.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') electronApp.quit();
+  });
+}

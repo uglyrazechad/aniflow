@@ -26,7 +26,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Введите почту и пароль' }, { status: 400 });
   }
 
-  const user = login.includes('@') ? findUserByEmail(login) : findUserByUsername(login);
+  const user = login.includes('@')
+    ? findUserByEmail(login, 'app')
+    : findUserByUsername(login, 'app');
   if (!user || !verifyPassword(password, user.passwordHash)) {
     return NextResponse.json({ error: 'Неверная почта или пароль' }, { status: 401 });
   }

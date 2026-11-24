@@ -12,6 +12,10 @@ export const metadata: Metadata = {
 
 const APK_URL =
   'https://github.com/uglyrazechad/aniflow/releases/latest/download/anihub.apk';
+const EXE_URL =
+  'https://github.com/uglyrazechad/aniflow/releases/latest/download/anihub-windows.exe';
+const SETUP_URL =
+  'https://github.com/uglyrazechad/aniflow/releases/latest/download/anihub-setup.exe';
 const RELEASES_URL = 'https://github.com/uglyrazechad/aniflow/releases/latest';
 
 export default function DownloadPage() {
@@ -25,7 +29,7 @@ export default function DownloadPage() {
           <div className="space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full border border-brand-400/30 bg-brand-400/10 px-3 py-1 text-xs font-medium text-brand-300">
               <Smartphone className="h-3.5 w-3.5" />
-              Android · версия 0.1.1
+              Android · версия 0.1.2
             </div>
 
             <div className="space-y-3">
@@ -36,9 +40,10 @@ export default function DownloadPage() {
                 </span>
               </h1>
               <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Тот же каталог, плеер и комнаты совместного просмотра, что и на сайте.
-                Войдите в аккаунт AniHub — избранное, история и комнаты синхронизируются
-                между телефоном и компьютером.
+                Отдельные приложения AniHub для Android и Windows: каталог, плеер и
+                комнаты прямо в программе, без браузера и без сайта. У приложений свой
+                аккаунт — он синхронизирует избранное, историю и комнаты между
+                телефоном и компьютером.
               </p>
             </div>
 
@@ -47,6 +52,12 @@ export default function DownloadPage() {
                 <a href={APK_URL}>
                   <Download className="h-5 w-5" />
                   Скачать APK
+                </a>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <a href={EXE_URL}>
+                  <Download className="h-5 w-5" />
+                  Скачать для Windows
                 </a>
               </Button>
               <Button asChild size="lg" variant="outline">
@@ -62,8 +73,8 @@ export default function DownloadPage() {
                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
                 Без рекламы и трекеров
               </span>
-              <span>Android 7.0+</span>
-              <span>~48 МБ</span>
+              <span>Android 7.0+ и Windows 10/11</span>
+              <span>APK ~48 МБ</span>
             </div>
           </div>
 
@@ -96,8 +107,8 @@ export default function DownloadPage() {
         />
         <Step
           number="3"
-          title="Войдите в аккаунт"
-          text="Регистрация та же, что на сайте. Комнаты, избранное и история появятся автоматически."
+          title="Войдите в аккаунт приложения"
+          text="Аккаунт приложений отдельный от сайта: он синхронизирует избранное, историю и комнаты между .apk и .exe."
         />
       </section>
 
@@ -122,7 +133,27 @@ export default function DownloadPage() {
         </ul>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2">
+      <section className="rounded-3xl border border-border/60 bg-card/40 p-6">
+        <h2 className="text-lg font-semibold">Если Windows ругается на .exe</h2>
+        <ul className="mt-3 space-y-2 text-sm leading-relaxed text-muted-foreground">
+          <li>
+            <span className="text-foreground">«Windows защитила ваш компьютер» / SmartScreen.</span>{' '}
+            Нажмите «Подробнее» → «Выполнить в любом случае». Это предупреждение о
+            неподписанном файле, а не о вирусе.
+          </li>
+          <li>
+            <span className="text-foreground">Портативная версия.</span> Файл
+            anihub-windows.exe запускается сразу, без установки; ярлык можно вынести на
+            рабочий стол вручную.
+          </li>
+          <li>
+            <span className="text-foreground">Нужен Windows 10 или 11, 64 бита.</span> На
+            старых версиях используйте сайт в браузере.
+          </li>
+        </ul>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-3">
         <div className="rounded-3xl border border-border/60 bg-card/40 p-6">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/15 text-brand-300">
@@ -145,14 +176,37 @@ export default function DownloadPage() {
         <div className="rounded-3xl border border-border/60 bg-card/40 p-6">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/15 text-sky-300">
-              <Chrome className="h-5 w-5" />
+              <Download className="h-5 w-5" />
             </div>
-            <h2 className="text-lg font-semibold">iPhone и компьютер</h2>
+            <h2 className="text-lg font-semibold">Windows</h2>
           </div>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            На iPhone откройте сайт в Safari → «Поделиться» → «На экран Домой».
-            На компьютере сайт открывается в браузере, а для Windows есть отдельное
-            окно AniHub.
+            Портативный .exe — просто запустите, ничего устанавливать не нужно. Или
+            установщик, если хотите ярлык в меню «Пуск». Windows 10/11.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Button asChild variant="secondary">
+              <a href={EXE_URL}>
+                <Download className="h-4 w-4" />
+                anihub-windows.exe
+              </a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href={SETUP_URL}>Установщик</a>
+            </Button>
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-border/60 bg-card/40 p-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-300">
+              <Chrome className="h-5 w-5" />
+            </div>
+            <h2 className="text-lg font-semibold">Сайт и iPhone</h2>
+          </div>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            Сайт работает сам по себе, со своим аккаунтом в браузере. На iPhone откройте
+            его в Safari → «Поделиться» → «На экран Домой».
           </p>
           <Button asChild variant="secondary" className="mt-5">
             <Link href="/">Открыть сайт</Link>

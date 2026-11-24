@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Некорректный код комнаты' }, { status: 400 });
   }
 
-  const guest = findUserByUsername(username);
+  const guest = findUserByUsername(username, 'app');
   if (!guest) {
     return NextResponse.json({ error: 'Пользователь не найден' }, { status: 404 });
   }
