@@ -1,0 +1,72 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_PUBLIC_API_URL: https://win-2a1h1l27b02.tail231ae6.ts.net
+      EXPO_NO_GIT_STATUS: '1'
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Android project
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Build release APK
+        run: |
+          chmod +x android/gradlew
+          cd android
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Collect APK
+        run: cp android/app/build/outputs/apk/release/app-release.apk anihub.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: anihub-apk
+          path: mobile/anihub.apk
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: mobile/anihub.apk
+          name: AniHub ${{ github.ref_name }}
+          make_latest: true
+          body: |
+            Android-приложение AniHub ${{ github.ref_name }}.
+
+            Установка:
+            1. Скачайте `anihub.apk` ниже.
+            2. Разрешите установку из неизвестных источников.
+            3. Откройте приложение — сервер уже настроен.
+
+            Сайт: https://win-2a1h1l27b02.tail231ae6.ts.net

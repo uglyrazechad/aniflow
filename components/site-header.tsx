@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, Search } from 'lucide-react';
+import { Menu, Search, Smartphone } from 'lucide-react';
 
 import { Logo } from '@/components/logo';
 import { SearchBox } from '@/components/search-box';
@@ -79,6 +79,17 @@ export function SiteHeader() {
             asChild
             variant="ghost"
             size="icon"
+            className="hidden rounded-xl border border-border/60 bg-card/40 sm:inline-flex"
+          >
+            <Link href="/download" aria-label="Скачать приложение">
+              <Smartphone className="h-[18px] w-[18px]" />
+            </Link>
+          </Button>
+
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
             className="rounded-xl border border-border/60 bg-card/40 lg:hidden"
           >
             <Link href="/search" aria-label="Поиск">
@@ -120,6 +131,13 @@ export function SiteHeader() {
                     {link.label}
                   </Link>
                 ))}
+                <Link
+                  href="/download"
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-xl px-3 py-3 text-base font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                >
+                  Приложение
+                </Link>
               </nav>
 
               <p className="mt-auto rounded-xl border border-border/60 bg-card/40 p-3 text-xs leading-relaxed text-muted-foreground">

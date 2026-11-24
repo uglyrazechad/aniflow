@@ -34,6 +34,11 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link href="/download" className="transition-colors hover:text-foreground">
+                Приложение для Android
+              </Link>
+            </li>
+            <li>
               <Link href="/#popular" className="transition-colors hover:text-foreground">
                 Популярное
               </Link>
