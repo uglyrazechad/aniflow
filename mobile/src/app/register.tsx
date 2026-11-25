@@ -45,7 +45,11 @@ export default function RegisterScreen() {
         <View style={styles.notice}>
           <Text style={styles.noticeTitle}>Проверьте почту</Text>
           <Text style={styles.noticeText}>{sent}</Text>
-          <Button title="У меня есть код / войти" variant="secondary" onPress={() => router.replace('/login')} />
+          <Button
+            title="Ввести код из письма"
+            variant="secondary"
+            onPress={() => router.replace({ pathname: '/verify', params: { email: email.trim() } })}
+          />
         </View>
       ) : (
         <View style={styles.form}>

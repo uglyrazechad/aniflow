@@ -5,14 +5,14 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
 import { TextField } from '@/components/text-field';
-import { describeError } from '@/lib/api';
+import { ApiError, describeError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { colors, fontSize, spacing } from '@/lib/theme';
 
 export default function LoginScreen() {
   const { signIn, busy } = useAuth();
-  const params = useLocalSearchParams<{ next?: string }>();
-  const [login, setLogin] = useState('');
+  const params = useLocalSearchParams<{ next?: string; login?: string }>();
+  const [login, setLogin] = useState(params.login ?? '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -24,6 +24,10 @@ export default function LoginScreen() {
       else if (router.canGoBack()) router.back();
       else router.replace('/');
     } catch (issue) {
+      if (issue instanceof ApiError && issue.needsVerification) {
+        router.replace({ pathname: '/verify', params: { email: login.trim() } });
+        return;
+      }
       setError(describeError(issue));
     }
   };

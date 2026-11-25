@@ -173,6 +173,18 @@ export const api = {
       body: { email, password, displayName },
     }),
 
+  verifyEmail: (email: string, code: string) =>
+    request<{ user: SafeUser; verified: boolean }>('/api/auth/verify-email', {
+      method: 'POST',
+      body: { email, code },
+    }),
+
+  resendVerify: (email: string) =>
+    request<{ ok: boolean; verified: boolean }>('/api/auth/resend-verify', {
+      method: 'POST',
+      body: { email },
+    }),
+
   me: (token: string) => request<{ user: SafeUser }>('/api/mobile/me', { token }),
 
   logout: (token: string) =>
